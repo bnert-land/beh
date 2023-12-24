@@ -1,0 +1,10 @@
+{:paths ["src"]
+ :deps {}
+ :aliases
+ {:dev {:extra-paths ["dev/src"]
+        :extra-deps {aleph/aleph {:mvn/version "0.6.4"}}}
+  :json/jsonista {:extra-deps 
+                  {metosin/jsonista {:mvn/version "0.3.8"}}}
+  :json/cheshire {:extra-deps
+                  {cheshire/cheshire {:mvn/version "5.10.0"}}}}}
+
