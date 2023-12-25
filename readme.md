@@ -53,6 +53,7 @@ nested deferreds:
     (beh/->json-response
       (beh/realize-deferreds
         (fn [req]
+          ; Top level deferred is optional
           (d/success-deferred
             {:status 200,
              :headers {"Content-Type" "application/json"}

@@ -45,10 +45,9 @@
                        :form-params  {:ima "teapot"}
                        #_#_:body         "{\"ima\": \"teapot\"}"})))
 
-
-  (println
+  (identity
     ; Will use jsonista for encode/decode
-    @(http/post "http://localhost:9109"
+    @(http/post "https://httpbin.org/anything"
       {:as :json
        :content-type :json
        :form-params {:ima "teapot"}}))

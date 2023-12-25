@@ -5,6 +5,8 @@
     [jsonista.core :as json]
     [manifold.deferred :as d]))
 
+(set! *warn-on-reflection* true)
+
 (defn- json-decode [x keys-as-keyword?]
   (json/read-value x (if keys-as-keyword?
                        json/keyword-keys-object-mapper
@@ -29,7 +31,7 @@
 ; Don't want this library to have side effectful imports
 (defn use-jsonista
   "At the root/core of your project, call this fn to patch the aleph
-  client to use jsonista and enable json encode/decode"
+  client to use jsonista instead of cheshire for json encode/decode."
   []
   (alter-var-root #'mw/json-enabled? (constantly true))
   (alter-var-root #'mw/json-decode (constantly json-decode))
@@ -40,25 +42,39 @@
   nil)
 
 (defn realize-deferreds
+  "Ring middleware for realizing top level or nested deferred values.
+
+  An optional catch function may be supplied in order to handle
+  any error deferred values or exceptions which are thrown."
   ([handler]
    (realize-deferreds handler
-     (fn [e]
+     (fn [^Exception e]
        {:status 500
         :body   {:errors [{:meta   {:cause (.getMessage e)}
                            :status 500
                            :title  "Server Error"}]}})))
   ([handler on-catch]
    (fn realize-deferreds* [req]
-     (let [res (handler req)
-           res (if (d/deferred? res)
-                 res
-                 (d/success-deferred res))]
-       (d/catch
-         (d/chain' res walk+defer)
-         on-catch)))))
+     (d/catch
+       (d/chain
+         (handler req)
+         walk+defer)
+       on-catch))))
 
 ; mainly to testing, but could be useful? Dunno, yet...
-(defn ->json-response [handler]
+(defn ->json-response
+  "Assumes the :body of a response is a clojure data structure which
+  needs to be encoded to JSON."
+  [handler]
   (fn ->json-response* [req]
-    (update (handler req) :body json/write-value-as-bytes)))
+    (d/catch
+      (d/chain
+        (handler req)
+        #(update % :body json/write-value-as-bytes))
+      (fn [^Exception e]
+        {:status 500,
+         :body   {:errors [{:meta   {:cause (.getMessage e)
+                                     :fn    "->json-response"}
+                            :status 500
+                            :title  "Server error"}]}}))))
 
