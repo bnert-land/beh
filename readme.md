@@ -4,10 +4,10 @@
 
 ## Overview
 
-This micro-library is a companion with [`aleph`](https://github.com/clj-commons/aleph),
+This micro-library is a companion to [`aleph`](https://github.com/clj-commons/aleph),
 providing:
 
-1. `metosin/jsonista` support for json encode/decode for the aleph http client
+1. [`metosin/jsonista`](https://github.com/metosin/jsonista) support for json encode/decode for the aleph http client.
 2. Nested deferred derefencing, which doesn't happend natively w/ aleph
 3. Others...?
 
@@ -16,6 +16,24 @@ of those libraries to you.
 
 See [`deps.edn`](./deps.edn) for specific versions of the various libraries
 which have been tested against.
+
+## Installation
+
+deps.edn/Clojure cli
+```
+land.bnert/beh {:git/url "https://github.com/bnert-land/beh"
+                :git/tag "0.1.0"
+                :git/sha ""}
+```
+or:
+```
+io.github.bnert-land/beh {:git/tag "0.1.0", :git/sha ""}
+```
+or (still todo, so don't use this option yet):
+```
+land.bnert/beh {:mvn/version "0.1.0"}
+```
+
 
 ## Getting Started
 
@@ -37,7 +55,7 @@ jsonista for aleph http client:
        :form-params {:ima "teapot"}})))
 ```
 
-nested deferreds:
+realizing nested deferred values:
 ```clojure
 (ns exaple.core
   (:require
@@ -76,3 +94,4 @@ nested deferreds:
        :content-type :json
        :form-params  {:ima "teapot"}})))
 ```
+
