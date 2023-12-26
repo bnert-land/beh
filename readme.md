@@ -19,20 +19,17 @@ which have been tested against.
 
 ## Installation
 
-deps.edn/Clojure cli
+Currently, only `deps.edn` is supported, with the only option right now
+being providing a full git sha.
 ```
 land.bnert/beh {:git/url "https://github.com/bnert-land/beh"
-                :git/tag "0.1.0"
-                :git/sha ""}
+                :git/sha "HEAD sha"}
+
+io.github.bnert-land/beh {:git/sha "HEAD sha"}
 ```
-or:
-```
-io.github.bnert-land/beh {:git/tag "0.1.0", :git/sha ""}
-```
-or (still todo, so don't use this option yet):
-```
-land.bnert/beh {:mvn/version "0.1.0"}
-```
+
+Eventually, a mvn will be released, along w/ a tagged version of the git
+coordinates above.
 
 
 ## Getting Started
