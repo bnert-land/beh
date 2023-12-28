@@ -1,10 +1,10 @@
 (ns user)
 
-(require '[aleph.http :as http])
-(require '[aleph.http.client-middleware :as mw])
-(require '[manifold.deferred :as d])
-(require '[jsonista.core :as j])
-(require '[beh.core :as beh])
+(require
+  '[aleph.http :as http]
+  '[aleph.http.client-middleware :as mw]
+  '[manifold.deferred :as d]
+  '[beh.core :as beh])
 
 
 (comment
@@ -23,10 +23,11 @@
   (def s
     (http/start-server
       (beh/->json-response
-        (beh/realize-deferreds
+        ((beh/realize-deferreds {:kind :ring/middleware})
           (fn [_req]
             {:status 200,
              :body   {:thing (d/success-deferred :thing)
+                      :error (d/error-deffered (Exception. "hi"))
                       :list  (d/zip (d/success-deferred 0)
                                     (d/success-deferred 1)
                                     (d/success-deferred 2))

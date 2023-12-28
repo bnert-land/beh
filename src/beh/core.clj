@@ -41,25 +41,38 @@
   (alter-var-root #'mw/json-encode (constantly json-encode))
   nil)
 
-(defn realize-deferreds
-  "Ring middleware for realizing top level or nested deferred values.
+(defn default-on-catch [^Exception e]
+  {:status 500
+   :body   {:errors [{:meta   {:cause (.getMessage e)}
+                      :status 500
+                      :title  "Server Error"}]}})
 
-  An optional catch function may be supplied in order to handle
-  any error deferred values or exceptions which are thrown."
-  ([handler]
-   (realize-deferreds handler
-     (fn [^Exception e]
-       {:status 500
-        :body   {:errors [{:meta   {:cause (.getMessage e)}
-                           :status 500
-                           :title  "Server Error"}]}})))
-  ([handler on-catch]
-   (fn realize-deferreds* [req]
+(defmulti realize-deferreds :kind)
+
+(defmethod realize-deferreds :ring/middleware
+  [{:keys [on-catch], :or {on-catch default-on-catch}}]
+  (fn realize-deferreds-middleware [handler]
+    (fn realize-deferreds-middleware* [req]
+      (d/catch
+        (d/chain
+          (handler req)
+          walk+defer)
+        on-catch))))
+
+(defmethod realize-deferreds :sieppari/interceptor
+  [{:keys [on-catch], :or {on-catch default-on-catch}}]
+  {:leave
+   (fn [ctx]
+     ; probably could be better from a perf standpoint?
      (d/catch
        (d/chain
-         (handler req)
-         walk+defer)
-       on-catch))))
+         ctx
+         #(update % :response walk+defer))
+       on-catch))})
+
+(defmethod realize-deferreds :default
+  [opts]
+  (realize-deferreds (assoc opts :kind :ring/middleware)))
 
 ; mainly to testing, but could be useful? Dunno, yet...
 (defn ->json-response
